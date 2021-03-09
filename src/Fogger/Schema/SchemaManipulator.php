@@ -106,16 +106,16 @@ class SchemaManipulator
         foreach ($sourceTables as $table) {
             foreach ($table->getColumns() as $column) {
                 if ($column->getAutoincrement()) {
-                    $max = $this->sourceConnection->fetchColumn(
-                        "SELECT MAX(" .$column->getName().") FROM ".$table->getName()
-                    );
+                    $auto_inc = $this->sourceConnection->fetchAssoc(
+                        "SHOW TABLE STATUS WHERE Name LIKE '".$table->getName()."'"
+                    )['Auto_increment'];
                     echo(sprintf(
                         "  - %s auto_increment to %s\n",
                         $table->getName(),
-                        $max + 1
+                        $auto_inc
                     ));
                     $this->targetConnection->query(
-                        "ALTER TABLE ".$table->getName()." AUTO_INCREMENT = ".($max+1)
+                        "ALTER TABLE ".$table->getName()." AUTO_INCREMENT = ". $auto_inc
                     );
                     break;
                 }
